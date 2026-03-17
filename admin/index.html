@@ -1,0 +1,27 @@
+#!/usr/local/bin/php
+<!-- Wrapper style -->
+<style>
+	html {
+		min-height: 100%;
+		display: flex;
+		flex-flow: column;
+	}
+
+	body#plugin-host {
+		flex: 1;
+		align-items: stretch;
+	}
+
+	body>#iframe-container {
+		display: flex;
+		flex-flow: column;
+	}
+
+	iframe#cloudflare_sync_iframe {
+		flex: 1;
+		height: auto;
+		min-height: unset;
+		width:100vw;
+	}
+</style>
+<iframe id="cloudflare_sync_iframe" src="index.raw" width="100%" frameborder="0"></iframe>

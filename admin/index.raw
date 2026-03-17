@@ -1,0 +1,130 @@
+#!/usr/local/bin/php
+<?php
+echo "HTTP/1.1 200 OK\n";
+echo "Content-Type: text/html\n\n";
+
+require_once __DIR__ . '/../lib/admin.php';
+
+$admin = new Admin();
+
+$config = $admin->config();
+$message = '';
+
+// Handle form submission
+if ($admin->hasParam('save')) {
+
+	$newConfig = [
+		'api_token' => $admin->getParam('api_token', ''),
+		'default_proxy' => $admin->hasParam('default_proxy'),
+		'auto_create_zones' => $admin->hasParam('auto_create_zones'),
+		'delete_zones' => $admin->hasParam('delete_zones'),
+		'debug' => $admin->hasParam('debug')
+	];
+
+	$result = $admin->saveConfig($newConfig);
+
+	$message = $result
+		? $admin->message('✅ Configuration saved successfully!')
+		: $admin->message('❌ Failed to save configuration. Check file permissions.', 'error');
+
+	$config = $newConfig;
+}
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Cloudflare Sync Configuration</title>
+	<link rel="stylesheet" href="/CMD_PLUGINS_ADMIN/cloudflare_sync/images/admin.css?<?= time() ?>">
+</head>
+
+<body>
+	<div class="container">
+		<div id="cloudflare_sync_container" class="card">
+			<h1 class="page__title">
+				<img src="/CMD_PLUGINS_ADMIN/cloudflare_sync/images/admin_icon.svg" width="65" height="65">
+				Cloudflare Sync Configuration
+			</h1>
+
+			<?= $message; ?>
+
+			<div class="info__box">
+				<h3>📋 API Token Setup</h3>
+				<p>Create an Account API token in Cloudflare here:
+					<a href="https://dash.cloudflare.com/?to=/:account/api-tokens" target="_blank">
+						https://dash.cloudflare.com/?to=/:account/api-tokens
+					</a>
+				</p>
+				<p>The following permissions are required for the token:</p>
+				<ul>
+					<li><strong>Zone:Read</strong></li>
+					<li><strong>Zone:Edit</strong></li>
+				</ul>
+			</div>
+
+			<form method="GET" action="index.raw">
+				<table>
+					<tr>
+						<td><strong>Cloudflare API Token:</strong></td>
+						<td>
+							<input type="password" name="api_token" value="<?= $admin->value('api_token') ?>" required>
+						</td>
+					</tr>
+
+					<tr>
+						<td>Enable proxy by default:</td>
+						<td>
+							<input type="checkbox" name="default_proxy" value="1" <?= $admin->isChecked('default_proxy', true) ?>>
+						</td>
+					</tr>
+
+					<tr>
+						<td>Auto-create zones:</td>
+						<td>
+							<input type="checkbox" name="auto_create_zones" value="1" <?= $admin->isChecked('auto_create_zones', true) ?>>
+						</td>
+					</tr>
+
+					<tr>
+						<td>Delete zones when domains removed:</td>
+						<td>
+							<input type="checkbox" name="delete_zones" value="1" <?= $admin->isChecked('delete_zones') ?>>
+						</td>
+					</tr>
+
+					<tr>
+						<td>Debug logging:</td>
+						<td>
+							<input type="checkbox" name="debug" value="1" <?= $admin->isChecked('debug') ?>>
+						</td>
+					</tr>
+
+					<tr>
+						<td colspan="2">
+							<input type="hidden" name="save" value="1">
+							<input type="submit" value="Save configuration" class="button">
+						</td>
+					</tr>
+				</table>
+			</form>
+
+			<!--
+
+			<hr>
+
+			<h3>⚡ Manual Sync Commands</h3>
+			<ul>
+				<li><code>php cloudflare_sync.php sync example.com</code></li>
+				<li><code>php cloudflare_sync.php sync-all</code></li>
+				<li><code>php cloudflare_sync.php sync example.com --dry-run</code></li>
+			</ul>
+			-->
+		</div>
+		<div id="disclaimer">
+			The Cloudflare logo is a trademark of Cloudflare, Inc. This plugin is an independent project and is not affiliated with Cloudflare. Use at your own risk.
+		</div>
+	</div>
+</body>
+
+</html>
